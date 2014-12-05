@@ -11,7 +11,13 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
       self.window.show_quick_panel(["No commits in this branch"], None)
       return
 
-    self.window.show_quick_panel([[msg, rev] for rev, msg in commits.items()], self.on_commit_enter_handler(list(commits.keys())))
+    revisions = []
+    list_items = []
+    for [rev, msg] in commits:
+      revisions.append(rev)
+      list_items.append([msg, rev])
+
+    self.window.show_quick_panel(list_items, self.on_commit_enter_handler(revisions))
 
   def on_commit_enter_handler(self, revisions):
     def on_commit_enter(rev):

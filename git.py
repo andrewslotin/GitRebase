@@ -44,8 +44,7 @@ class Git:
     self._cwd = cwd
 
   def log(self, limit = None):
-    commits = {}
-    git_command = "log --oneline --no-color"
+    git_command = "log --oneline --no-color --no-abbrev-commit"
 
     current_branch = self.current_branch()
     if current_branch != "master":
@@ -57,11 +56,7 @@ class Git:
     sublime.status_message(git_command)
 
     history = self._run(git_command)
-    for line in history.splitlines():
-      [rev, msg] = line.split(" ", 1)
-      commits[rev] = msg
-
-    return commits
+    return [line.split(" ", 1) for line in history.splitlines()]
 
   def current_branch(self):
     return self._run("rev-parse --abbrev-ref HEAD")
