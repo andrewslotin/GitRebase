@@ -24,7 +24,7 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
       if rev < 0:
         return
 
-      sublime.status_message("rebase --interactive {0}~1".format(revisions[rev]))
+      self._git().rebase("{0}~1".format(revisions[rev]), interactive=True)
 
     return on_commit_enter
 
@@ -46,11 +46,11 @@ class GitRebaseAbortCommand(GitCommand, sublime_plugin.WindowCommand):
     self._git_rebase_abort()
 
   def _git_rebase_abort(self):
-    sublime.status_message("rebase --abort")
+    self._git().abort_rebase()
 
 class GitRebaseContinueCommand(GitCommand, sublime_plugin.WindowCommand):
   def run(self):
     self._git_rebase_continue()
 
   def _git_rebase_continue(self):
-    sublime.status_message("rebase --continue")
+    sublime._git().continue_rebase()

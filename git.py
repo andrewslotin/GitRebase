@@ -58,6 +58,22 @@ class Git:
     history = self._run(git_command)
     return [line.split(" ", 1) for line in history.splitlines()]
 
+  def rebase(self, upstream, interactive = False):
+    git_command = "rebase"
+
+    if interactive:
+      git_command += " --interactive"
+
+    git_command += " {}".format(upstream)
+
+    self._run(git_command)
+
+  def abort_rebase(self):
+    self._run("rebase --abort")
+
+  def continue_rebase(self):
+    self._run("rebase --continue")
+
   def current_branch(self):
     return self._run("rev-parse --abbrev-ref HEAD")
 
