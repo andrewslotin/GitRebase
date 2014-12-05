@@ -2,7 +2,27 @@ import sublime, sublime_plugin
 import re
 import os
 
-from .git import Git, GitCommand
+from .git import Git
+
+class GitCommand(object):
+  def _git(self):
+    cwd = self.__get_cwd()
+    if not hasattr(self, '__cached_git') or cwd != self.__cached_cwd:
+      self.__cached_cwd = cwd
+      self.__cached_git = Git(self.__cached_cwd)
+
+    return self.__cached_git
+
+  def __get_cwd(self):
+    view = self.window.active_view()
+    if view and view.file_name() and len(view.file_name()) > 0:
+      return os.path.realpath(os.path.dirname(view.file_name()))
+
+    try:
+      return self.window.folders()[0]
+    except IndexError:
+      return None
+
 
 class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
   def run(self):
