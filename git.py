@@ -53,6 +53,9 @@ class Git:
 
     return commits
 
+  def current_branch(self):
+    return self._run("rev-parse --abbrev-ref HEAD")
+
   def _run(self, command):
     if self._cwd == None or not os.path.isdir(self._cwd):
       os.chdir(self.working_dir)
@@ -65,5 +68,5 @@ class Git:
     except TimeoutExpired:
       sublime.status_message("'{0} {1}' timed out".format(GIT, command))
 
-    return output
+    return output.strip()
 
