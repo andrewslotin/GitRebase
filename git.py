@@ -75,8 +75,17 @@ class Git:
   def continue_rebase(self):
     self._run("rebase --continue")
 
+  def stash(self):
+    self._run("stash")
+
+  def stash(self):
+    self._run("stash pop")
+
   def current_branch(self):
     return self._run("rev-parse --abbrev-ref HEAD")
+
+  def is_clean(self):
+    return len(self._run("status -s -uno") == 0)
 
   def _run(self, command):
     if self._cwd == None or not os.path.isdir(self._cwd):
