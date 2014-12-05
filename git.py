@@ -8,6 +8,7 @@ def _test_paths_for_executable(paths, test_file):
     if os.path.exists(file_path) and os.access(file_path, os.X_OK):
       return file_path
 
+# Thanks kemayo/sublime-text-2-git
 def find_git():
   # It turns out to be difficult to reliably run git, with varying paths
   # and subprocess environments across different platforms. So. Let's hack
@@ -85,27 +86,13 @@ class Git:
     git = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
     output = ""
     try:
-      output = git.communicate(timeout=5)[0]
-    except TimeoutExpired:
-      sublime.status_message("'{0} {1}' timed out".format(GIT, command))
+      [output, error] = git.communicate(timeout=5)
+
+      if error:
+        print(error.decode('utf-8'))
+
+      git.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+      return ""
 
     return output.strip().decode('utf-8')
-
-class GitCommand(object):
-  def _git(self):
-    cwd = self.__get_cwd()
-    if not hasattr(self, '__cached_git') or cwd != self.__cached_cwd:
-      self.__cached_cwd = cwd
-      self.__cached_git = Git(self.__cached_cwd)
-
-    return self.__cached_git
-
-  def __get_cwd(self):
-    view = self.window.active_view()
-    if view and view.file_name() and len(view.file_name()) > 0:
-      return os.path.realpath(os.path.dirname(view.file_name()))
-
-    try:
-      return self.window.folders()[0]
-    except IndexError:
-      return None
