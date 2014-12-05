@@ -43,12 +43,22 @@ class Git:
   def __init__(self, cwd):
     self._cwd = cwd
 
-  def log(self, limit):
+  def log(self, limit = None):
     commits = {}
-    history = self._run("log --oneline --no-color -n {0}".format(limit))
+    git_command = "log --oneline --no-color"
 
+    current_branch = self.current_branch()
+    if current_branch != "master":
+      git_command += " master..{}".format(current_branch)
+
+    if limit != None:
+      git_command += " -n {}".format(limit)
+
+    sublime.status_message(git_command)
+
+    history = self._run(git_command)
     for line in history.splitlines():
-      [rev, msg] = line.decode('utf-8').split(" ", 1)
+      [rev, msg] = line.split(" ", 1)
       commits[rev] = msg
 
     return commits
@@ -68,5 +78,23 @@ class Git:
     except TimeoutExpired:
       sublime.status_message("'{0} {1}' timed out".format(GIT, command))
 
-    return output.strip()
+    return output.strip().decode('utf-8')
 
+class GitCommand(object):
+  def _git(self):
+    cwd = self.__get_cwd()
+    if not hasattr(self, '__cached_git') or cwd != self.__cached_cwd:
+      self.__cached_cwd = cwd
+      self.__cached_git = Git(self.__cached_cwd)
+
+    return self.__cached_git
+
+  def __get_cwd(self):
+    view = self.window.active_view()
+    if view and view.file_name() and len(view.file_name()) > 0:
+      return os.path.realpath(os.path.dirname(view.file_name()))
+
+    try:
+      return self.window.folders()[0]
+    except IndexError:
+      return None
