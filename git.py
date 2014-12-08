@@ -87,22 +87,17 @@ class Git:
   def is_clean(self):
     return len(self._run("status -s -uno") == 0)
 
-  def _run(self, command):
+  def _run(self, command, **env_vars):
     cwd = self._cwd
     if cwd != None and not os.path.isdir(self._cwd):
       cwd = None
 
-    cmd = [GIT] + shlex.split(command)
-    git = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
-    output = ""
-    try:
-      [output, error] = git.communicate(timeout=5)
-
-      if error:
-        print(error.decode('utf-8'))
+    environ = os.environ.copy()
+    for (var, val) in env_vars.items():
+      environ[var] = shlex.quote(val)
 
     cmd = [GIT] + shlex.split(command)
-    with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd) as git:
+    with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, env=environ) as git:
       output = ""
       try:
         [output, error] = git.communicate(timeout=5)
