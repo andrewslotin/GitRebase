@@ -54,9 +54,10 @@ class Git:
 
     environ = os.environ.copy()
     for (var, val) in env_vars.items():
-      environ[var] = shlex.quote(val)
+      environ[var] = val
 
     cmd = [self._git] + shlex.split(command)
+
     with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, env=environ) as git:
       output = ""
       try:
