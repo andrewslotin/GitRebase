@@ -88,8 +88,9 @@ class Git:
     return len(self._run("status -s -uno") == 0)
 
   def _run(self, command):
-    if self._cwd == None or not os.path.isdir(self._cwd):
-      os.chdir(self.working_dir)
+    cwd = self._cwd
+    if cwd != None and not os.path.isdir(self._cwd):
+      cwd = None
 
     cmd = [GIT] + shlex.split(command)
     git = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
@@ -100,8 +101,15 @@ class Git:
       if error:
         print(error.decode('utf-8'))
 
-      git.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-      return ""
+    cmd = [GIT] + shlex.split(command)
+    with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd) as git:
+      output = ""
+      try:
+        [output, error] = git.communicate(timeout=5)
+
+        if error:
+          print(error.decode('utf-8'))
+      except subprocess.TimeoutExpired:
+        print("`{0} {1}` timed out".format(GIT, command))
 
     return output.strip().decode('utf-8')
