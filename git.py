@@ -2,47 +2,14 @@ import sublime
 import os, shlex
 import subprocess
 
-def _test_paths_for_executable(paths, test_file):
-  for directory in paths:
-    file_path = os.path.join(directory, test_file)
-    if os.path.exists(file_path) and os.access(file_path, os.X_OK):
-      return file_path
-
-# Thanks kemayo/sublime-text-2-git
-def find_git():
-  # It turns out to be difficult to reliably run git, with varying paths
-  # and subprocess environments across different platforms. So. Let's hack
-  # this a bit.
-  # (Yes, I could fall back on a hardline "set your system path properly"
-  # attitude. But that involves a lot more arguing with people.)
-  path = os.environ.get('PATH', '').split(os.pathsep)
-  if os.name == 'nt':
-    git_cmd = 'git.exe'
-  else:
-    git_cmd = 'git'
-
-  git_path = _test_paths_for_executable(path, git_cmd)
-
-  if not git_path:
-    # /usr/local/bin:/usr/local/git/bin
-    if os.name == 'nt':
-      extra_paths = (
-        os.path.join(os.environ["ProgramFiles"], "Git", "bin"),
-        os.path.join(os.environ["ProgramFiles(x86)"], "Git", "bin"),
-      )
-    else:
-      extra_paths = (
-        '/usr/local/bin',
-        '/usr/local/git/bin',
-      )
-    git_path = _test_paths_for_executable(extra_paths, git_cmd)
-  return git_path
-
-GIT = find_git()
-
 class Git:
   def __init__(self, cwd):
     self._cwd = cwd
+    self._git = "git"
+
+    s = sublime.load_settings("GitRebase.sublime-settings")
+    if s.get('git_command'):
+      self._git = s.get('git_command')
 
   def log(self, limit = None):
     git_command = "log --oneline --no-color --no-abbrev-commit"
@@ -89,7 +56,7 @@ class Git:
     for (var, val) in env_vars.items():
       environ[var] = shlex.quote(val)
 
-    cmd = [GIT] + shlex.split(command)
+    cmd = [self._git] + shlex.split(command)
     with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, env=environ) as git:
       output = ""
       try:
