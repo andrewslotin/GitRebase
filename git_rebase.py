@@ -62,12 +62,6 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
     return ""
 
   def _stash_and_edit_revision(self, rev):
-    if not self._git().is_clean():
-      if not sublime.ok_cancel_dialog("Current working directory contains not commited changes. Is it OK to stash them?", "Yes, please"):
-        return
-
-      self._git().stash_changes()
-
     self._git().edit_revision(rev)
 
 class GitRebaseAbortCommand(GitCommand, sublime_plugin.WindowCommand):

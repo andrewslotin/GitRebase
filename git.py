@@ -27,7 +27,7 @@ class Git:
     return [line.split(" ", 1) for line in history.splitlines()]
 
   def edit_revision(self, rev):
-    self._run("rebase --interactive {}~1".format(rev), GIT_SEQUENCE_EDITOR="sed -i '' -e 's/^\s*pick {0}/edit {0}/g'".format(rev[0:7]))
+    self._run("rebase --autostash --interactive {}~1".format(rev), GIT_SEQUENCE_EDITOR="sed -i '' -e 's/^\s*pick {0}/edit {0}/g'".format(rev[0:7]))
 
   def abort_rebase(self):
     self._run("rebase --abort")
