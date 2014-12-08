@@ -37,14 +37,14 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
       revisions.append(rev)
       list_items.append([msg, rev])
 
-    self.window.show_quick_panel(list_items, self.on_commit_enter_handler(revisions))
+    self.window.show_quick_panel(list_items, self.__on_commit_enter_handler(revisions))
 
-  def on_commit_enter_handler(self, revisions):
+  def __on_commit_enter_handler(self, revisions):
     def on_commit_enter(rev):
       if rev < 0:
         return
 
-      self._git().rebase("{0}~1".format(revisions[rev]), interactive=True)
+      self._stash_and_edit_revision(revisions[rev])
 
     return on_commit_enter
 
@@ -60,6 +60,15 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
         return m.group('rev')
 
     return ""
+
+  def _stash_and_edit_revision(self, rev):
+    if not self._git().is_clean():
+      if not sublime.ok_cancel_dialog("Current working directory contains not commited changes. Is it OK to stash them?", "Yes, please"):
+        return
+
+      self._git().stash_changes()
+
+    self._git().edit_revision(rev)
 
 class GitRebaseAbortCommand(GitCommand, sublime_plugin.WindowCommand):
   def run(self):

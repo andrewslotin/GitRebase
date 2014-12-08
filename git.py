@@ -59,15 +59,8 @@ class Git:
     history = self._run(git_command)
     return [line.split(" ", 1) for line in history.splitlines()]
 
-  def rebase(self, upstream, interactive = False):
-    git_command = "rebase"
-
-    if interactive:
-      git_command += " --interactive"
-
-    git_command += " {}".format(upstream)
-
-    self._run(git_command)
+  def edit_revision(self, rev):
+    self._run("rebase --interactive {}~1".format(rev), GIT_SEQUENCE_EDITOR="sed -i '' -e 's/^\s*pick {0}/edit {0}/g'".format(rev[0:7]))
 
   def abort_rebase(self):
     self._run("rebase --abort")
@@ -75,17 +68,17 @@ class Git:
   def continue_rebase(self):
     self._run("rebase --continue")
 
-  def stash(self):
+  def stash_changes(self):
     self._run("stash")
 
-  def stash(self):
+  def apply_stash(self):
     self._run("stash pop")
 
   def current_branch(self):
     return self._run("rev-parse --abbrev-ref HEAD")
 
   def is_clean(self):
-    return len(self._run("status -s -uno") == 0)
+    return len(self._run("status -s -uno")) == 0
 
   def _run(self, command, **env_vars):
     cwd = self._cwd
