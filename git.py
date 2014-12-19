@@ -24,7 +24,7 @@ class Git:
     sublime.status_message(git_command)
 
     history = self._run(git_command)
-    return [line.split(" ", 1) for line in history.splitlines()]
+    return [tuple(line.split(" ", 1)) for line in history.splitlines()]
 
   def edit_revision(self, rev):
     self._run("rebase --autostash --interactive {}~1".format(rev), GIT_SEQUENCE_EDITOR="sed -i '' -e 's/^\s*pick {0}/edit {0}/g'".format(rev[0:7]))

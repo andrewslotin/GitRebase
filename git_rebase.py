@@ -33,11 +33,11 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
 
     revisions = []
     list_items = []
-    for [rev, msg] in commits:
+    for (i, (rev, msg)) in enumerate(commits):
       revisions.append(rev)
-      list_items.append([msg, rev])
+      list_items.append("{0}: {1}".format(rev[0:6], msg))
 
-    self.window.show_quick_panel(list_items, self.__on_commit_enter_handler(revisions))
+    self.window.show_quick_panel(list_items, self.__on_commit_enter_handler(revisions), sublime.MONOSPACE_FONT)
 
   def __on_commit_enter_handler(self, revisions):
     def on_commit_enter(rev):
