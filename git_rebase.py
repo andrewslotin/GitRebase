@@ -31,13 +31,19 @@ class GitRebaseEditCommitCommand(GitCommand, sublime_plugin.WindowCommand):
       self.window.show_quick_panel(["No commits in this branch"], None)
       return
 
+    selected_rev = self._selected_rev()
+
     revisions = []
     list_items = []
+    selected_rev_index = -1
     for (i, (rev, msg)) in enumerate(commits):
-      revisions.append(rev)
       list_items.append("{0}: {1}".format(rev[0:6], msg))
+      revisions.append(rev)
 
-    self.window.show_quick_panel(list_items, self.__on_commit_enter_handler(revisions), sublime.MONOSPACE_FONT)
+      if selected_rev != "" and rev.startswith(selected_rev):
+        selected_rev_index = i
+
+    self.window.show_quick_panel(list_items, self.__on_commit_enter_handler(revisions), sublime.MONOSPACE_FONT, selected_rev_index)
 
   def __on_commit_enter_handler(self, revisions):
     def on_commit_enter(rev):
