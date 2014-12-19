@@ -1,0 +1,12 @@
+[
+  {
+    "caption": "GitRebase: Edit Commit",
+    "command": "git_rebase_edit_commit"
+  },{
+    "caption": "GitRebasse: Abort",
+    "command": "git_rebase_abort"
+  },{
+    "caption": "GitRebase: Continue",
+    "command": "git_rebase_continue"
+  }
+]
