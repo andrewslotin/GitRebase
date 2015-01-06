@@ -82,4 +82,4 @@ class GitRebaseContinueCommand(GitCommand, sublime_plugin.WindowCommand):
     self._git_rebase_continue()
 
   def _git_rebase_continue(self):
-    sublime._git().continue_rebase()
+    self._git().continue_rebase()
